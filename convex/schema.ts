@@ -4,18 +4,17 @@ import { v } from "convex/values";
 
 const schema = defineSchema({
   ...authTables,
-  conversations: defineTable({
+  conversation: defineTable({
     memberOneId: v.id("users"),
     memberTwoId: v.id("users"),
-    createdAt: v.number()
-  }),
+    createdAt: v.number(),
+  }).index("memberOneId", ["memberOneId"]).index("memberTwoId", ["memberTwoId"]),
   messages: defineTable({
-    conversationId: v.id("conversations"),
-    body : v.id("users"),
-    memberTwoId: v.id("users"),
-    message: v.string()
-  }),
-  // Your other tables...
+    conversationId: v.id("conversation"),
+    senderId: v.id("users"),
+    body: v.string(),
+    sentAt: v.number(),
+  })
 });
 
 export default schema;

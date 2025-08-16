@@ -1,7 +1,10 @@
+"use client"
 
 const Messages = () => {
   return (
-    <div>Messages</div>
+    <div className="">
+      Sup dawg
+    </div>
   )
 }
 
