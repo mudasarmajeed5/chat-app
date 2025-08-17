@@ -8,20 +8,23 @@ export const createOrGetConversation = mutation({
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx)
         if (!userId) throw new Error("Unauthorized");
-        const existingOne = await ctx.db.query("conversation").withIndex("memberOneId",
-            (q) => q.eq("memberOneId", userId)
-        ).filter((q) =>
-            q.eq(q.field("memberTwoId"), args.memberId)
-        ).unique();
-        if (existingOne) return existingOne._id;
+        const existingConversation = await ctx.db
+            .query("conversation")
+            .filter((q) =>
+                q.or(
+                    q.and(
+                        q.eq(q.field("memberOneId"), userId),
+                        q.eq(q.field("memberTwoId"), args.memberId)
+                    ),
+                    q.and(
+                        q.eq(q.field("memberOneId"), args.memberId),
+                        q.eq(q.field("memberTwoId"), userId)
+                    )
+                )
+            )
+            .unique();
 
-        const existingTwo = await ctx.db.query("conversation").withIndex("memberTwoId",
-            (q) => q.eq("memberTwoId", args.memberId)
-        ).filter((q) =>
-            q.eq(q.field("memberOneId"), userId)
-        ).unique();
-        if (existingTwo) return existingTwo._id;
-
+        if (existingConversation) return existingConversation._id;
         const newConversation = await ctx.db.insert("conversation",
             {
                 memberOneId: userId,

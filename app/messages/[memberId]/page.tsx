@@ -8,7 +8,7 @@ import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import useCreateOrGetConversation from '@/app/features/conversation/use-create-or-get-conversation'
 import useSendMessage from '@/app/features/conversation/use-send-message'
-import { useGetMessages } from '@/app/features/conversation/use-get-message'
+import MessageList from './MessageSection'
 
 const MessageSection = () => {
     const { memberId } = useParams();
@@ -23,8 +23,6 @@ const MessageSection = () => {
         isLoading: isCreatingConversation,
         error: conversationError
     } = useCreateOrGetConversation();
-    const convoId = conversationId as Id<"conversation">
-    const { messages } = useGetMessages({ conversationId: convoId ?? undefined });
 
 
     // Send message
@@ -55,27 +53,10 @@ const MessageSection = () => {
 
             {/* Messages Area */}
             <div className='flex-1 p-2 overflow-y-auto'>
-                {convoId && messages?.map((msg) => {
-                    const isMe = msg.senderId === "123";
-
-                    return (
-                        <div
-                            key={msg._id}
-                            className={`flex ${isMe ? "justify-end" : "justify-start"}`}
-                        >
-                            <div
-                                className={`max-w-xs px-4 py-2 rounded-2xl shadow 
-                                ${isMe ? "bg-blue-500 text-white rounded-br-none" : "bg-gray-600 text-white rounded-bl-none"}
-                            `}
-                            >
-                                <p className="whitespace-pre-wrap">{msg.body}</p>
-                                <span className="block text-xs opacity-70 mt-1 text-right">
-                                    {new Date(msg.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                </span>
-                            </div>
-                        </div>
-                    );
-                })}
+                <MessageList
+                    memberId={memberId as Id<"users">}
+                    conversationId={conversationId as Id<"conversation">}
+                />
                 {isCreatingConversation && <p className="text-sm text-gray-400">Setting up chat...</p>}
                 {conversationError && <p className="text-red-400">Failed to load conversation</p>}
                 {sendError && <p className="text-red-400">Failed to send message</p>}
